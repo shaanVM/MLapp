@@ -55,24 +55,51 @@ def main():
 			if st.checkbox('Display Correlation of various columns '):
 				st.write(df.corr())			
 
+# Visualization part
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    
 	elif activity=='Visualization':
 		st.subheader('Data Visualization')
+		data=st.file_uploader('Upload Dataset ',type=['csv','xlsx'])
+		if data is not None:
+			st.success('Dataset uploaded successfully')
+			df=pd.read_csv(data)
+			st.dataframe(df)
+			if st.checkbox('Select Multiple columns'):
+				selected_columns=st.multiselect('Select columns ',df.columns)
+				df1=df[selected_columns]
+				st.dataframe(df1)
+			st.set_option('deprecation.showPyplotGlobalUse', False)	
+			if st.checkbox('Display Heatmap of selected features'):
+				st.write(sns.heatmap(df1.corr(),annot=True,cmap='viridis'))
+				st.pyplot()
+			if st.checkbox('Display Pair plot '):
+				st.write(sns.pairplot(df1,diag_kind='kde'))
+				st.pyplot()		
+			if st.checkbox('Display Pie chart '):
+				all_columns=df.columns.to_list()
+				pie_columns=st.selectbox('select columns to display ',all_columns)
+				pie_charts=df[pie_columns].value_counts().plot.pie()
+				st.write(pie_charts)
+				st.pyplot()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	elif activity=='Model':
 		st.subheader('Model Building')
 
