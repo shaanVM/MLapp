@@ -57,7 +57,7 @@ def main():
 
 # Visualization part
 
-    
+	
 	elif activity=='Visualization':
 		st.subheader('Data Visualization')
 		data=st.file_uploader('Upload Dataset ',type=['csv','xlsx'])
@@ -83,32 +83,63 @@ def main():
 				st.write(pie_charts)
 				st.pyplot()
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# Model Building
 
 	elif activity=='Model':
 		st.subheader('Model Building')
+		data=st.file_uploader('Upload dataset ',type=['csv','xlsx'])
+		if data is not None:
+			st.success('Dataset uploaded successfully')
+			df=pd.read_csv(data)
+			st.dataframe(df)
+			if st.checkbox('Select Multiple columns'):
+				selected_columns=st.multiselect('Select columns (Make sure last columns must be target variable)',df.columns)
+				df1=df[selected_columns]
+				st.dataframe(df1)
+				#dividing into x and y
+				X=df1.iloc[:,0:-1]
+				y=df1.iloc[:,-1]
+				# st.write('x',X)
+				# st.write('-'*100)
+				# st.write('y',y)
 
+			classifier_name=st.sidebar.selectbox('Select Algorithm',['KNN','SVM','LR','Naive bayes','Decision tree'])
+			
+			def add_parameter(name_of_classifier):
+				params=dict()
+				if name_of_classifier=='SVM':
+					params['C']=st.sidebar.slider('C',0.01,15.0)
+				elif name_of_classifier=='KNN':
+					params['K']=st.sidebar.slider('K',1,15)	
+				return params
+				
 
+			params=add_parameter(classifier_name)
 
-
-
-
-
+			def get_classifier(classifier_name,params):
+				model=None
+				if classifier_name=='KNN':
+					model=KNeighborsClassifier(n_neighbors=params['K'])
+				elif classifier_name=='SVM':
+					model=SVC(C=params['C'])
+				elif classifier_name=='LR':
+					model=LogisticRegression()
+				elif classifier_name=='Naive bayes':
+					model=GaussianNB()
+				elif classifier_name=='Decision tree':
+					model=DecisionTreeClassifier()
+				else:
+					st.warning('select algorithm')
+				return model 
+				
+			model=get_classifier(classifier_name,params)
+			X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.3,random_state=24)
+			model.fit(X_train,y_train)	
+			ypred=model.predict(X_test)	
+			score=accuracy_score(y_test,ypred)
+			st.write('Predictions',ypred)
+			st.write(f'Name of classifier = {classifier_name}')
+			st.write(f'Accuracy = {round((score*100),4)}%')      
 
 
 
